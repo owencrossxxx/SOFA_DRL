@@ -1,0 +1,43 @@
+############################################################################
+
+# Soft Robotics Lab, Oxford Uni.
+# Template for converting STL into VTU with CGAL
+
+#Note 1: There are other tools that do the same job. It is up to you which one to use.
+#Note 2: The code was provided by SoftRobots plugin develop team
+
+# Wenye Ouyang (Owen)
+# wenye@robots.ox.ac.uk
+# Last review date: 20/4/2020
+
+############################################################################
+
+
+import Sofa
+import math
+import os
+
+path = os.path.dirname(os.path.abspath(__file__))+'/data/mesh/'
+
+def createScene(rootNode):
+
+		rootNode.createObject('RequiredPlugin', pluginName='CGALPlugin')
+		node = rootNode.createChild('node')
+
+		#Load STL file
+		node.createObject('MeshSTLLoader',name='mesh',filename=path+'Ex3.stl')
+
+		#Specify mesh parameters. These given values in the template don't promise a good mesh!
+	  	node.createObject('MeshGenerationFromPolyhedron',name='gen',template='Vec3d',inputPoints='@mesh.position', inputTriangles='@mesh.triangles',drawTetras='1',
+				        cellSize='30',
+								facetSize='30',
+								cellRatio='5',
+								facetApproximation='0.8'
+								)
+
+		node.createObject('Mesh', position='@gen.outputPoints', tetrahedra='@gen.outputTetras')
+
+		#Output as VTU containing a tetrahedral mesh
+		node.createObject('VTKExporter', filename=path+'Ex3', edges='0', tetras='1', exportAtBegin='1')
+		node.createObject('OglModel', src="@mesh", color="0.0 0.7 0.7 0.5")
+		return rootNode
